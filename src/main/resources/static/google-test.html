@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vidoo - Google Authentication Test</title>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+        }
+
+        #result {
+            margin-top: 24px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vidoo</h1>
+    <p>Test Google authentication</p>
+
+    <div
+        id="g_id_onload"
+        data-client_id="555896338596-5pgmeu89qap3974o3b868lm76neqnaqb.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+    </div>
+
+    <div
+        class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline">
+    </div>
+
+    <pre id="result">Waiting for Google sign-in...</pre>
+
+    <script>
+        async function handleCredentialResponse(response) {
+            const result = document.getElementById("result");
+            result.textContent = "Authenticating with Vidoo...";
+
+            try {
+                const apiResponse = await fetch("/api/v1/auth/google", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        idToken: response.credential
+                    })
+                });
+
+                const data = await apiResponse.json();
+
+                if (!apiResponse.ok) {
+                    throw new Error(JSON.stringify(data));
+                }
+
+                result.textContent = JSON.stringify({
+                    authenticated: Boolean(data.accessToken),
+                    accessToken: data.accessToken,
+                    tokenType: data.tokenType,
+                    user: data.user
+                }, null, 2);
+
+            } catch (error) {
+                result.textContent = "Authentication failed:\n" + error.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
