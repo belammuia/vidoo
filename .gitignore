@@ -48,3 +48,6 @@ application-local.yml
 ### Uploaded files ###
 uploads/
 *.mp4
+
+# Uploaded video files
+storage/
